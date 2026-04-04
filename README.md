@@ -6,7 +6,9 @@ SMYD 9th Cohort Project | A Team
 # 📅 Project Overview기간: 2026년 3월 29일 ~ 2026년 8월 7일 
 주요 목표: 트랙 형상 및 동역학 모델을 고려한 Racing Line 최적화 실제 F1 트랙 데이터를 활용한 알고리즘 검증 및 성능 평가 최소 5개 이상의 트랙에 대한 랩타임 분석 수행 
 
-# 🛠️ Tech Stack & ModelsLanguage & Environment: MATLAB 
+# 🛠️ Tech Stack & Models
+
+## Language & Environment: MATLAB 
 - Vehicle Model: Bicycle Kinematics Model을 기반으로 한 차량 단순화 및 동역학 모델링 (상태 벡터 $[x, y, \theta]$ 정의) 
 - Optimization: MATLAB Optimization Toolbox를 활용한 비선형 최적화(Nonlinear Optimization) 문제 구성
 - Key Algorithm: Curvature 기반 Racing Line Optimization Forward/Backward Pass를 통한 Velocity Profile 계산 
