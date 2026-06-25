@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+__MACOSX/
+._*
+
+# MATLAB backup / temporary files
+*.asv
+*.m~
+*.tmp
+
+# Simulink / generated cache
+slprj/
+codegen/
+*.slxc
+
+# Generated data and results
+data/results/
+data/processed_tracks/
+
+# Large media outputs
+*.gif
+*.mp4
+*.avi
+
+# MATLAB result files
+*.mat
+
+# Logs
+*.log
