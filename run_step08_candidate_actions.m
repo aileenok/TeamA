@@ -98,14 +98,45 @@ for i = 1:numel(candidates)
         candidates(i).reason);
 end
 
-%% 7. 정적 시각화
+%% 7. Cost-based decision
+% 각 candidate에 대해 collision / offtrack / time / progress cost를 계산하고,
+% valid candidate 중 totalCost가 가장 낮은 후보를 best action으로 선택한다.
+
+for i = 1:numel(candidates)
+    candidates(i) = evaluateCandidateCost(candidates(i), ego, opponents, track, decision);
+end
+
+bestCandidate = selectBestCandidateByCost(candidates);
+
+fprintf("\n=== Candidate Cost Breakdown ===\n");
+fprintf("%-18s | %6s | %10s | %10s | %10s | %10s | %10s\n", ...
+    "action", "valid", "collision", "offtrack", "time", "progress", "total");
+
+for i = 1:numel(candidates)
+    fprintf("%-18s | %6d | %10.2f | %10.2f | %10.2f | %10.2f | %10.2f\n", ...
+        candidates(i).name, ...
+        candidates(i).isValid, ...
+        candidates(i).costCollision, ...
+        candidates(i).costOfftrack, ...
+        candidates(i).costTime, ...
+        candidates(i).costProgress, ...
+        candidates(i).totalCost);
+end
+
+fprintf("\nSelected action (cost-based): %s  (totalCost = %.2f)\n", ...
+    bestCandidate.name, bestCandidate.totalCost);
+
+%% 8. 정적 시각화
 plotCandidateActions(track, ego, opponents, candidates);
 
-%% 8. candidate action rollout 애니메이션 확인
-% 아직 cost-based decision 전 단계이므로,
-% valid candidate 중 우선순위에 따라 애니메이션으로 확인할 action을 선택한다.
+%% 9. candidate action rollout 애니메이션 확인
+% cost-based decision 결과(bestCandidate)를 애니메이션으로 확인한다.
+% 참고: selectCandidateForAnimation은 cost 계산 전 단계에서 쓰던
+%       우선순위 기반 선택 방식으로, 비교용으로 남겨둔다.
+%
+% legacyActionName = selectCandidateForAnimation(candidates);
 
-selectedActionName = selectCandidateForAnimation(candidates);
+selectedActionName = bestCandidate.name;
 
 % GIF 저장 여부
 % true  : data/results/animations 폴더에 GIF 저장
@@ -120,7 +151,7 @@ animateCandidateAction2D( ...
     selectedActionName, ...
     saveGif);
 
-%% 9. 결과 저장
+%% 10. 결과 저장
 resultFolder = fullfile("data", "results");
 
 if ~isfolder(resultFolder)
@@ -137,6 +168,7 @@ save(resultFile, ...
     "sideInfo", ...
     "decisionInfo", ...
     "candidates", ...
+    "bestCandidate", ...
     "selectedActionName", ...
     "race", ...
     "decision", ...
