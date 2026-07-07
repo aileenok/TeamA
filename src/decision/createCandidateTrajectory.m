@@ -93,11 +93,16 @@ candidate.minCollisionSGap = inf;
 candidate.minCollisionDGap = inf;
 
 %% 8. cost 관련 기본값
+% evaluateCandidateCost에서 채워진다.
+%   costCollision : 충돌/안전 여유 위반 비용
+%   costOfftrack  : track 경계 여유 부족 비용
+%   costTime      : 위험 상황까지 남은 시간 비용
+%   costProgress  : 진행 속도(progress) 비용
+%   totalCost     : 위 네 비용의 가중합
 candidate.costCollision = NaN;
+candidate.costOfftrack = NaN;
+candidate.costTime = NaN;
 candidate.costProgress = NaN;
-candidate.costTrack = NaN;
-candidate.costControl = NaN;
-candidate.costSpeed = NaN;
 candidate.totalCost = NaN;
 
 %% 9. action별 추가 정보 기본값
