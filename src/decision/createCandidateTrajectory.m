@@ -3,7 +3,7 @@ function candidate = createCandidateTrajectory(track, ego, actionName, targetD, 
 % actionName, targetD, targetV를 받아서 time-based candidate trajectory 생성
 %
 % 출력 candidate 필드:
-%   name, time, s, d, v, x, y, xy
+%   name, time, s, d, v, x, y, yaw, xy
 %   targetD, targetV
 %   isValid, reason
 %   collision 관련 필드
@@ -23,7 +23,7 @@ t = (0:decision.dt:decision.horizon)';
 N = length(t);
 
 %% 2. lateral offset d 생성
-% lateral 이동은 전체 horizon 10초 동안 천천히 하는 것이 아니라,
+% lateral 이동은 전체 prediction horizon 동안 무조건 수행하는 것이 아니라,
 % laneChangeTime 안에 targetD에 도달하도록 한다.
 
 laneChangeTime = min(decision.laneChangeTime, decision.horizon);
@@ -60,13 +60,33 @@ x = zeros(N, 1);
 y = zeros(N, 1);
 
 for k = 1:N
-    xy = frenetToGlobalCustom(track, s(k), d(k));
+    position = frenetToGlobalCustom(track, s(k), d(k));
 
-    x(k) = xy(1);
-    y(k) = xy(2);
+    x(k) = position(1);
+    y(k) = position(2);
 end
 
-%% 6. candidate 구조체 생성
+%% 6. Global trajectory의 reference yaw 계산
+% 경로의 시간에 따른 진행 방향을 이용해 yaw를 계산한다.
+%
+% yaw = 0       : global +x 방향
+% yaw = pi/2    : global +y 방향
+% positive yaw  : 반시계방향
+%
+% unwrap은 pi와 -pi 경계를 지날 때 yaw가 갑자기
+% 약 2*pi만큼 튀는 현상을 방지한다.
+
+if N < 2
+    error("Yaw를 계산하려면 trajectory point가 2개 이상 필요합니다.");
+end
+
+dxdt = gradient(x, t);
+dydt = gradient(y, t);
+
+yaw = atan2(dydt, dxdt);
+yaw = unwrap(yaw);
+
+%% 7. candidate 구조체 생성
 candidate.name = actionName;
 candidate.time = t;
 
@@ -76,6 +96,7 @@ candidate.v = v;
 
 candidate.x = x;
 candidate.y = y;
+candidate.yaw = yaw;
 candidate.xy = [x, y];
 
 candidate.targetD = targetD;
@@ -84,7 +105,7 @@ candidate.targetV = targetV;
 candidate.isValid = true;
 candidate.reason = "valid";
 
-%% 7. collision 관련 기본값
+%% 8. collision 관련 기본값
 candidate.collisionRisk = false;
 candidate.collisionOpponentIndex = NaN;
 candidate.collisionOpponentName = "";
@@ -92,7 +113,7 @@ candidate.collisionTime = NaN;
 candidate.minCollisionSGap = inf;
 candidate.minCollisionDGap = inf;
 
-%% 8. cost 관련 기본값
+%% 9. cost 관련 기본값
 candidate.costCollision = NaN;
 candidate.costProgress = NaN;
 candidate.costTrack = NaN;
@@ -100,17 +121,17 @@ candidate.costControl = NaN;
 candidate.costSpeed = NaN;
 candidate.totalCost = NaN;
 
-%% 9. action별 추가 정보 기본값
+%% 10. action별 추가 정보 기본값
 candidate.speedMode = "";
 candidate.cornerDirection = "";
 candidate.kappaLookahead = NaN;
 candidate.alreadyNearReferenceLine = false;
 
-%% 10. track boundary 정보 기본값
+%% 11. track boundary 정보 기본값
 candidate.leftLimit = [];
 candidate.rightLimit = [];
 
-%% 11. safety warning 정보 기본값
+%% 12. safety warning 정보 기본값
 candidate.safetyRisk = false;
 candidate.safetyOpponentIndex = NaN;
 candidate.safetyOpponentName = "";

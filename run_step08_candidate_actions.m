@@ -25,11 +25,10 @@ track = data.track;
 race = raceParams();
 decision = decisionParams();
 
-% candidate action 애니메이션을 10초 동안 보기 위한 설정
-decision.horizon = 10.0;   % [s] candidate rollout 시간
-decision.dt = 0.10;        % [s] 0.1초 간격 → 총 약 101 frame
+% Candidate horizon과 sampling interval은
+% config/decisionParams.m의 설정을 그대로 사용한다.
 
-% 현재 random opponent version 기준
+% Opponent 3대의 초기 위치, 속도, lateral offset 설정
 oppParams = opponentParams(track);
 
 %% 3. 차량 생성
